@@ -1,0 +1,31 @@
+## DEPLOYMENT MANIFEST START ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: musinsa-test
+  labels:
+    app: musinsa-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: musinsa-test
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: musinsa-test
+    spec:
+      containers:
+      - image: musinsa-test:latest
+        name: musinsa-test
+        envFrom:
+        - secretRef:
+            name: aws-secret-bdm8fgg479
+        ports:
+        - containerPort: 3000
+        resources: {}
+        imagePullPolicy: Never
+      restartPolicy: Always
+status: {}
+## DEPLOYMENT MANIFEST END ##

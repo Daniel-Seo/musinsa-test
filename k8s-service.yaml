@@ -1,0 +1,14 @@
+## POD MANIFEST START ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: musinsa-test
+spec:
+  ports:
+    - name: "musinsa-test-port"
+      port: 8081
+      targetPort: 3000
+  selector:
+    app: musinsa-test
+  type: NodePort
+## POD MANIFEST END ##
