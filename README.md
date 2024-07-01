@@ -1,73 +1,53 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# 동작 확인
+### docker image 생성
+$ docker build -t musinsa-test .
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### minikube가 local docker iamge를 가져올 수 있도록 변경(터미널 세션당 1회성)
+$ eval $(minikube -p minikube docker-env)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-$ yarn install
+### .env.secret 파일 생성후 aws access 정보 입력
+$ touch .env.secret
 ```
-
-## Running the app
-
-```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+AWS_ACCESS_KEY=
+AWS_SECRET_ACCESS_KEY=
 ```
+### k8s secret 추가
+$ kubectl apply -k .
+$ kubectl apply -f k8s-manifest.yaml
 
-## Test
-
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+### deployment, service 구성
+### 생성된 aws-secret-{val} 값을 k8s-deployment.yaml 에 수정
 ```
+spec:
+      containers:
+      - image: musinsa-test:latest
+        name: musinsa-test
+        envFrom:
+        - secretRef:
+            name: aws-secret-{val}
+```
+$ kubectl apply -f k8s-deployment.yaml
 
-## Support
+$ kubectl apply -f k8s-service.yaml
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 서비스 확인
+$ kubectl port-forward service/musinsa-test 3000:8080
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+----
 
-## License
+참고 자료
+aws-sdk에서 iam만 사용
+생성일 기준 users 조회
+https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/iam/
+https://medium.com/@NickHystax/3-easy-steps-to-find-all-inactive-users-in-your-aws-account-for-access-management-and-security-5490f012d294
 
-Nest is [MIT licensed](LICENSE).
+Dockerfile
+https://kawther-asma.medium.com/optimizing-dockerfiles-made-easy-for-nestjs-applications-01bf2f2565c2
+
+minikube 로컬 이미지 사용
+https://baeji77.github.io/dev/infra/kubernetes/use-local-docker-image-in-kubernetes/
+https://kubernetes.io/docs/concepts/containers/images/#updating-images
+
+k8s 구성
+https://waspro.tistory.com/520
