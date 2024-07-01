@@ -1,0 +1,4 @@
+secretGenerator:
+- name: aws-secret
+  envs:
+  - .env.secret
