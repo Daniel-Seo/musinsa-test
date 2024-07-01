@@ -51,3 +51,4 @@ https://kubernetes.io/docs/concepts/containers/images/#updating-images
 
 k8s 구성
 https://waspro.tistory.com/520
+https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kustomize/
